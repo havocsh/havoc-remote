@@ -47,7 +47,7 @@ def get_ip():
 
 def get_commands_http(rt, task_name, command_list):
     commands_response = None
-    h = havoc.Connect(rt.api_region, rt.api_domain_name, rt.api_key, rt.secret)
+    h = havoc.Connect(rt.api_region, rt.api_domain_name, rt.api_key, rt.secret, api_version=1)
     try:
         commands_response = h.get_commands(task_name)
     except Exception as err:
@@ -59,7 +59,7 @@ def get_commands_http(rt, task_name, command_list):
 
 
 def post_response_http(rt, results):
-    h = havoc.Connect(rt.api_region, rt.api_domain_name, rt.api_key, rt.secret)
+    h = havoc.Connect(rt.api_region, rt.api_domain_name, rt.api_key, rt.secret, api_version=1)
     try:
         h.post_response(results)
     except Exception as err:
@@ -68,7 +68,7 @@ def post_response_http(rt, results):
 
 def sync_workspace_http(rt, sync_direction):
     sync_workspace_response = None
-    h = havoc.Connect(rt.api_region, rt.api_domain_name, rt.api_key, rt.secret)
+    h = havoc.Connect(rt.api_region, rt.api_domain_name, rt.api_key, rt.secret, api_version=1)
     try:
         sync_workspace_response = h.sync_workspace(sync_direction, '/opt/havoc/shared')
     except Exception as err:
@@ -79,7 +79,7 @@ def sync_workspace_http(rt, sync_direction):
 def file_transfer_http(rt, sync_direction, file_name):
     success = False
     file_transfer_response = None
-    h = havoc.Connect(rt.api_region, rt.api_domain_name, rt.api_key, rt.secret)
+    h = havoc.Connect(rt.api_region, rt.api_domain_name, rt.api_key, rt.secret, api_version=1)
     if sync_direction == 'download_from_workspace':
         try:
             file_transfer_response = h.get_file(file_name)
@@ -294,7 +294,7 @@ def main():
 
     # Register as a remote task
     try:
-        h = havoc.Connect(rt.api_region, rt.api_domain_name, rt.api_key, rt.secret)
+        h = havoc.Connect(rt.api_region, rt.api_domain_name, rt.api_key, rt.secret, api_version=1)
         h.register_task(task_name, task_context, task_type, task_version, public_ip, local_ip)
     except Exception as e:
         print(f'Remote task registration failed with error:\n{e}\nExiting...')
