@@ -104,7 +104,8 @@ def file_transfer_http(rt, sync_direction, file_name):
 
 def send_response(rt, task_response, forward_log, user_id, task_name, task_context, task_type, task_version,
                   instruct_user_id, instruct_instance, instruct_command, instruct_args, public_ip, local_ip, end_time):
-    stime = datetime.now(timezone.utc).strftime('%s')
+    current_time = datetime.now(timezone.utc)
+    stime = str(int(datetime.timestamp(current_time)))
     output = {
         'instruct_command_output': task_response, 'user_id': user_id, 'task_name': task_name,
         'task_context': task_context, 'task_type': task_type, 'task_version': task_version,
@@ -209,7 +210,7 @@ def action(user_id, task_type, task_version, task_commands, task_name, task_cont
                 send_response(rt, {'outcome': 'success', 'status': 'terminating'}, 'True', user_id, task_name,
                               task_context, task_type, task_version, instruct_user_id, instruct_instance, instruct_command,
                               instruct_args, public_ip, local_ip, end_time)
-                subprocess.call(["/bin/kill", "-15", "1"], stdout=sys.stderr)
+                os.kill(os.getpid(), 9)
             else:
                 if instruct_instance not in local_instruct_instance:
                     local_instruct_instance[instruct_instance] = havoc_remote.Remote()
@@ -278,7 +279,7 @@ def main():
     for k, v in var_assignments.items():
         if not v:
             print(f'Error: value for {k} in link.ini file cannot be empty')
-            subprocess.call(["/bin/kill", "-15", "1"], stdout=sys.stderr)
+            os.kill(os.getpid(), 9)
 
     # Instantiate Remote to serve key_pair as a property
     rt = Remote(api_key, secret, api_domain_name, api_region)
@@ -289,7 +290,7 @@ def main():
         public_ip = r.text.rstrip()
     except requests.ConnectionError:
         print('Public IP check failed. Exiting...')
-        subprocess.call(["/bin/kill", "-15", "1"], stdout=sys.stderr)
+        os.kill(os.getpid(), 9)
     hostname = socket.gethostname()
 
     # Register as a remote task
@@ -298,7 +299,7 @@ def main():
         h.register_task(task_name, task_context, task_type, task_version, public_ip, local_ip)
     except Exception as e:
         print(f'Remote task registration failed with error:\n{e}\nExiting...')
-        subprocess.call(["/bin/kill", "-15", "1"], stdout=sys.stderr)
+        os.kill(os.getpid(), 9)
 
     # Setup coroutine resources
     command_list = []

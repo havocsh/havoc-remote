@@ -1,3 +1,4 @@
 requests
+service-identity
 Twisted
 git+https://github.com/havocsh/havoc-pkg.git@1.0.0#egg=havoc
