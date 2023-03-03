@@ -35,7 +35,7 @@ echo "Extracting NSSM package contents"
 c:\windows\system32\windowspowershell\v1.0\powershell.exe Expand-Archive nssm-2.24.zip
 
 echo "Installing HavocRemoteOperator service"
-nssm-2.24\nssm-2.24\win64\nssm.exe install HavocRemoteOperator "%%cwd%%\python.exe" "%%cwd%%\link.py"
+nssm-2.24\nssm-2.24\win64\nssm.exe install HavocRemoteOperator "%cwd%\python.exe" "%cwd%\link.py"
 
 echo "Starting HavocRemoteOperator service"
 nssm-2.24\nssm-2.24\win64\nssm.exe start HavocRemoteOperator
