@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 
 import os
-import sys
+import atexit
+import signal
 import socket
 import pathlib
 import requests
-import subprocess
 from configparser import ConfigParser
 from datetime import datetime, timezone
 from twisted.python import log
@@ -119,6 +119,16 @@ def send_response(rt, task_response, forward_log, user_id, task_name, task_conte
 @inlineCallbacks
 def action(user_id, task_type, task_version, task_commands, task_name, task_context, rt, end_time, command_list,
            public_ip, hostname, local_ip):
+    
+    def exit_handler():
+        send_response(rt, {'outcome': 'success', 'status': 'terminating'}, 'True', user_id, task_name,
+                      task_context, task_type, task_version, instruct_user_id, 'None', 'terminate',
+                      {'no_args': 'True'}, public_ip, local_ip, end_time)
+        log.msg(
+            f'remote_operator task exiting'
+        )
+
+    atexit.register(exit_handler)
     local_instruct_instance = {}
 
     while True:
@@ -138,16 +148,16 @@ def action(user_id, task_type, task_version, task_commands, task_name, task_cont
                 else:
                     response_kv = ['outcome', 'success']
                 send_response(rt, {response_kv[0]: response_kv[1], 'local_directory_contents': file_list}, 'True',
-                              user_id, task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance,
-                              instruct_command, instruct_args, public_ip, local_ip, end_time)
+                            user_id, task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance,
+                            instruct_command, instruct_args, public_ip, local_ip, end_time)
             elif instruct_command == 'ls':
                 file_list = []
                 for root, subdirs, files in os.walk('/opt/havoc/shared'):
                     for filename in files:
                         file_list.append(filename)
                 send_response(rt, {'outcome': 'success', 'local_directory_contents': file_list}, 'False',
-                              user_id, task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance,
-                              instruct_command, instruct_args, public_ip, local_ip, end_time)
+                            user_id, task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance,
+                            instruct_command, instruct_args, public_ip, local_ip, end_time)
             elif instruct_command == 'del':
                 if 'file_name' in instruct_args:
                     file_name = instruct_args['file_name']
@@ -155,21 +165,21 @@ def action(user_id, task_type, task_version, task_commands, task_name, task_cont
                     if path.is_file():
                         os.remove(path)
                         send_response(rt, {'outcome': 'success'}, 'True', user_id, task_name, task_context, task_type,
-                                      task_version, instruct_user_id, instruct_instance, instruct_command, instruct_args,
-                                      public_ip, local_ip, end_time)
+                                    task_version, instruct_user_id, instruct_instance, instruct_command, instruct_args,
+                                    public_ip, local_ip, end_time)
                     else:
                         send_response(rt, {'outcome': 'failed', 'message': 'File not found'}, 'False', user_id,
-                                      task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance,
-                                      instruct_command, instruct_args, public_ip, local_ip, end_time)
+                                    task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance,
+                                    instruct_command, instruct_args, public_ip, local_ip, end_time)
                 else:
                     send_response(rt, {'outcome': 'failed', 'message': 'Missing file_name'}, 'False',
-                                  user_id, task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance,
-                                  instruct_command, instruct_args, public_ip, local_ip, end_time)
+                                user_id, task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance,
+                                instruct_command, instruct_args, public_ip, local_ip, end_time)
             elif instruct_command == 'sync_to_workspace':
                 file_list = sync_workspace_http(rt, 'sync_to_workspace')
                 send_response(rt, {'outcome': 'success', 'local_directory_contents': file_list}, 'False', user_id,
-                              task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance, instruct_command,
-                              instruct_args, public_ip, local_ip, end_time)
+                            task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance, instruct_command,
+                            instruct_args, public_ip, local_ip, end_time)
             elif instruct_command == 'upload_to_workspace':
                 if 'file_name' in instruct_args:
                     file_name = instruct_args['file_name']
@@ -177,16 +187,16 @@ def action(user_id, task_type, task_version, task_commands, task_name, task_cont
                     if path.is_file():
                         file_transfer_http(rt, 'upload_to_workspace', file_name)
                         send_response(rt, {'outcome': 'success'}, 'True', user_id, task_name, task_context, task_type,
-                                      task_version, instruct_user_id, instruct_instance, instruct_command, instruct_args,
-                                      public_ip, local_ip, end_time)
+                                    task_version, instruct_user_id, instruct_instance, instruct_command, instruct_args,
+                                    public_ip, local_ip, end_time)
                     else:
                         send_response(rt, {'outcome': 'failed', 'message': 'File not found'}, 'False', user_id,
-                                      task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance,
-                                      instruct_command, instruct_args, public_ip, local_ip, end_time)
+                                    task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance,
+                                    instruct_command, instruct_args, public_ip, local_ip, end_time)
                 else:
                     send_response(rt, {'outcome': 'failed', 'message': 'Missing file_name'}, 'False',
-                                  user_id, task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance,
-                                  instruct_command, instruct_args, public_ip, local_ip, end_time)
+                                user_id, task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance,
+                                instruct_command, instruct_args, public_ip, local_ip, end_time)
             elif instruct_command == 'download_from_workspace':
                 if 'file_name' in instruct_args:
                     file_name = instruct_args['file_name']
@@ -196,21 +206,18 @@ def action(user_id, task_type, task_version, task_commands, task_name, task_cont
                         file_not_found = True
                     if file_not_found:
                         send_response(rt, {'outcome': 'failed', 'message': 'File not found'}, 'False', user_id,
-                                      task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance,
-                                      instruct_command, instruct_args, public_ip, local_ip, end_time)
+                                    task_name, task_context, task_type, task_version, instruct_user_id, instruct_instance,
+                                    instruct_command, instruct_args, public_ip, local_ip, end_time)
                     else:
                         send_response(rt, {'outcome': 'success'}, 'True', user_id, task_name, task_context, task_type,
-                                      task_version, instruct_user_id, instruct_instance, instruct_command, instruct_args,
-                                      public_ip, local_ip, end_time)
+                                    task_version, instruct_user_id, instruct_instance, instruct_command, instruct_args,
+                                    public_ip, local_ip, end_time)
                 else:
                     send_response(rt, {'outcome': 'failed', 'message': 'Missing file_name'}, 'False', user_id, task_name,
-                                  task_context, task_type, task_version, instruct_user_id, instruct_instance, instruct_command,
-                                  instruct_args, public_ip, local_ip, end_time)
+                                task_context, task_type, task_version, instruct_user_id, instruct_instance, instruct_command,
+                                instruct_args, public_ip, local_ip, end_time)
             elif instruct_command == 'terminate':
-                send_response(rt, {'outcome': 'success', 'status': 'terminating'}, 'True', user_id, task_name,
-                              task_context, task_type, task_version, instruct_user_id, instruct_instance, instruct_command,
-                              instruct_args, public_ip, local_ip, end_time)
-                os.kill(os.getpid(), 9)
+                os.kill(os.getpid(), signal.CTRL_BREAK_EVENT)
             else:
                 if instruct_instance not in local_instruct_instance:
                     local_instruct_instance[instruct_instance] = havoc_remote.Remote()
@@ -229,8 +236,8 @@ def action(user_id, task_type, task_version, task_commands, task_name, task_cont
                 forward_log = call_method['forward_log']
                 del call_method['forward_log']
                 send_response(rt, call_method, forward_log, user_id, task_name, task_context, task_type,
-                              task_version, instruct_user_id, instruct_instance, instruct_command, instruct_args, public_ip,
-                              local_ip, end_time)
+                            task_version, instruct_user_id, instruct_instance, instruct_command, instruct_args, public_ip,
+                            local_ip, end_time)
             command_list.remove(c)
         yield sleep(5)
 
@@ -261,7 +268,12 @@ def main():
     public_ip = None
     end_time = 'None'
     
-    log.startLogging(sys.stdout)
+    log.startLogging(open('link.log', 'w'))
+    log.msg(
+        f'remote_operator task starting - task_name: {task_name}, task_context: {task_context}, '
+        f'task_version {task_version}, api_region: {api_region}, api_domain_name: {api_domain_name}, '
+        f'user_id: {user_id}, api_key: {api_key}, local_ip: {local_ip}, public_ip: {public_ip}'
+    )
     
     var_assignments = {
         'task_name': task_name,
