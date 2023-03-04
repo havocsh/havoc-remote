@@ -1,3 +1,4 @@
+@echo off
 FOR /F "tokens=* USEBACKQ" %%F IN (`cd`) DO (SET cwd=%%F)
 
 echo "Downloading Python 3.10.10"
@@ -52,3 +53,4 @@ echo "Starting HavocRemoteOperator service"
 nssm-2.24\nssm-2.24\win64\nssm.exe start HavocRemoteOperator
 
 echo "Install complete"
+timeout /t 15
