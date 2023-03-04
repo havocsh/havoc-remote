@@ -13,7 +13,7 @@ echo "Downloading pip installer"
 c:\windows\system32\curl.exe -O -L https://bootstrap.pypa.io/get-pip.py
 
 echo "Running pip installer"
-python.exe get-pip.py
+python.exe get-pip.py --no-warn-script-location
 echo Lib\site-packages>> python310._pth
 
 echo "Installing havoc-remote requirements to embedded Python environment"
@@ -35,7 +35,7 @@ echo "Extracting NSSM package contents"
 c:\windows\system32\windowspowershell\v1.0\powershell.exe Expand-Archive nssm-2.24.zip
 
 echo "Installing HavocRemoteOperator service"
-nssm-2.24\nssm-2.24\win64\nssm.exe install HavocRemoteOperator "%cwd%\python.exe" "%cwd%\link.py"
+nssm-2.24\nssm-2.24\win64\nssm.exe install HavocRemoteOperator "%cwd%\python.exe" """%cwd%\link.py"""
 nssm-2.24\nssm-2.24\win64\nssm.exe set HavocRemoteOperator AppStdout "%cwd%\link.log"
 nssm-2.24\nssm-2.24\win64\nssm.exe set HavocRemoteOperator AppStderr "%cwd%\link.log"
 nssm-2.24\nssm-2.24\win64\nssm.exe set HavocRemoteOperator AppStdoutCreationDisposition 4
