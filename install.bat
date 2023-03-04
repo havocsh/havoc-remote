@@ -8,7 +8,7 @@ c:\windows\system32\windowspowershell\v1.0\powershell.exe Expand-Archive python-
 move python-3.10.10-embed-amd64\* .
 move python-3.10.10-embed-amd64\Lib .
 move python-3.10.10-embed-amd64\Scripts .
-del python-3.10.10-embed-amd64
+rmdir /S /Q python-3.10.10-embed-amd64
 del python-3.10.10-embed-amd64.zip
 
 echo "Downloading pip installer"
