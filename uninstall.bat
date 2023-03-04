@@ -1,10 +1,10 @@
 @echo off
 echo Uninstalling ./HAVOC remote_operator task:
 echo - Stopping HavocRemoteOperator service
-echo - & nssm-2.24\nssm-2.24\win64\nssm.exe stop HavocRemoteOperator
+nssm-2.24\nssm-2.24\win64\nssm.exe stop HavocRemoteOperator >nul
 
 echo - Uninstalling HavocRemoteOperator service
-echo - & nssm-2.24\nssm-2.24\win64\nssm.exe remove HavocRemoteOperator confirm
+nssm-2.24\nssm-2.24\win64\nssm.exe remove HavocRemoteOperator confirm >nul
 
 echo - Backing up link.ini to link.ini.bak
 copy link.ini link.ini.bak >nul
