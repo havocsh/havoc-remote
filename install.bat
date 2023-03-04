@@ -36,6 +36,14 @@ c:\windows\system32\windowspowershell\v1.0\powershell.exe Expand-Archive nssm-2.
 
 echo "Installing HavocRemoteOperator service"
 nssm-2.24\nssm-2.24\win64\nssm.exe install HavocRemoteOperator "%cwd%\python.exe" "%cwd%\link.py"
+nssm-2.24\nssm-2.24\win64\nssm.exe set HavocRemoteOperator AppStdout "%cwd%\link.log"
+nssm-2.24\nssm-2.24\win64\nssm.exe set HavocRemoteOperator AppStderr "%cwd%\link.log"
+nssm-2.24\nssm-2.24\win64\nssm.exe set HavocRemoteOperator AppStdoutCreationDisposition 4
+nssm-2.24\nssm-2.24\win64\nssm.exe set HavocRemoteOperator AppStderrCreationDisposition 4
+nssm-2.24\nssm-2.24\win64\nssm.exe set HavocRemoteOperator AppRotateFiles 1
+nssm-2.24\nssm-2.24\win64\nssm.exe set HavocRemoteOperator AppRotateOnline 0
+nssm-2.24\nssm-2.24\win64\nssm.exe set HavocRemoteOperator AppRotateSeconds 86400
+nssm-2.24\nssm-2.24\win64\nssm.exe set HavocRemoteOperator AppRotateBytes 1048576
 
 echo "Starting HavocRemoteOperator service"
 nssm-2.24\nssm-2.24\win64\nssm.exe start HavocRemoteOperator

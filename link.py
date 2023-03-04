@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import sys
 import atexit
 import signal
 import socket
@@ -124,9 +125,7 @@ def action(user_id, task_type, task_version, task_commands, task_name, task_cont
         send_response(rt, {'outcome': 'success', 'status': 'terminating'}, 'True', user_id, task_name,
                       task_context, task_type, task_version, instruct_user_id, 'None', 'terminate',
                       {'no_args': 'True'}, public_ip, local_ip, end_time)
-        log.msg(
-            f'remote_operator task exiting'
-        )
+        log.msg('remote_operator task exiting')
 
     atexit.register(exit_handler)
     local_instruct_instance = {}
@@ -268,7 +267,7 @@ def main():
     public_ip = None
     end_time = 'None'
     
-    log.startLogging(open('link.log', 'w'))
+    log.startLogging(sys.stdout)
     log.msg(
         f'remote_operator task starting - task_name: {task_name}, task_context: {task_context}, '
         f'task_version {task_version}, api_region: {api_region}, api_domain_name: {api_domain_name}, '
