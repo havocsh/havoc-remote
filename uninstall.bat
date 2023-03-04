@@ -1,14 +1,20 @@
 @echo off
-echo "Stopping HavocRemoteOperator service"
+echo "Uninstalling ./HAVOC remote_operator task:"
+echo ""
+echo " - Stopping HavocRemoteOperator service"
+echo ""
 nssm-2.24\nssm-2.24\win64\nssm.exe stop HavocRemoteOperator
 
-echo "Uninstalling HavocRemoteOperator service"
+echo " - Uninstalling HavocRemoteOperator service"
+echo ""
 nssm-2.24\nssm-2.24\win64\nssm.exe remove HavocRemoteOperator confirm 
 
-echo "Backing up link.ini to link.ini.bak"
+echo " - Backing up link.ini to link.ini.bak"
+echo ""
 copy link.ini link.ini.bak >nul
 
-echo "Deleting all files and directories except the link.ini backup"
+echo " - Deleting all files and directories except the link.ini backup"
+echo ""
 rmdir /S /Q __pycache__ >nul
 rmdir /S /Q havoc-pkg >nul
 rmdir /S /Q Lib >nul
