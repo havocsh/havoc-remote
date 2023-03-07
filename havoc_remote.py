@@ -65,7 +65,7 @@ class Remote:
         file_name = self.args['file_name']
         with requests.get(url, stream=True) as r:
             r.raise_for_status()
-            with open(f'arsenal/{file_name}', 'wb') as f:
+            with open(f'arsenal\\{file_name}', 'wb') as f:
                 for chunk in r.iter_content(chunk_size=8192): 
                     f.write(chunk)
         output = {'outcome': 'success', 'file_path': 'arsenal', 'file_name': file_name, 'forward_log': 'True'}
