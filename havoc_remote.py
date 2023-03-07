@@ -62,7 +62,7 @@ class Remote:
             output = {'outcome': 'failed', 'message': 'instruct_args must specify url', 'forward_log': 'False'}
             return output
         url = self.args['url']
-        domain_search = re.search('https?://([^/]+)/', url)
+        domain_search = re.search('https?://([^/]+)/', url, re.IGNORECASE)
         domain = None
         if domain_search:
             domain = domain_search.group(1)
