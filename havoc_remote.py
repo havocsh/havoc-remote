@@ -77,7 +77,10 @@ class Remote:
         count = 0
         while not resolved_ip and count < 30:
             t.sleep(10)
-            resolved_ip = socket.gethostbyname(domain)
+            try:
+                resolved_ip = socket.gethostbyname(domain)
+            except:
+                pass
             count += 1
         if not resolved_ip:
             output = {'outcome': 'failed', 'message': f'could not resolve domain {domain}', 'forward_log': 'False'}
