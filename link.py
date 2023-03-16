@@ -127,7 +127,8 @@ def action(user_id, task_type, task_version, task_commands, task_name, task_cont
                       {'no_args': 'True'}, public_ip, local_ip, end_time)
         log.msg('remote_operator task exiting')
 
-    atexit.register(exit_handler(rt, user_id, task_name, task_context, task_type, task_version, public_ip, local_ip, end_time))
+    exit_args = [rt, user_id, task_name, task_context, task_type, task_version, public_ip, local_ip, end_time]
+    atexit.register(exit_handler, *exit_args)
     local_instruct_instance = {}
 
     while True:
