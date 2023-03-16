@@ -267,13 +267,6 @@ def main():
     public_ip = None
     end_time = 'None'
     
-    log.startLogging(sys.stdout)
-    log.msg(
-        f'remote_operator task starting - task_name: {task_name}, task_context: {task_context}, '
-        f'task_version {task_version}, api_region: {api_region}, api_domain_name: {api_domain_name}, '
-        f'user_id: {user_id}, api_key: {api_key}, local_ip: {local_ip}, public_ip: {public_ip}'
-    )
-    
     var_assignments = {
         'task_name': task_name,
         'task_context': task_context,
@@ -303,6 +296,13 @@ def main():
         print('Public IP check failed. Exiting...')
         os.kill(os.getpid(), 9)
     hostname = socket.gethostname()
+
+    log.startLogging(sys.stdout)
+    log.msg(
+        f'remote_operator task starting - task_name: {task_name}, task_context: {task_context}, '
+        f'task_version {task_version}, api_region: {api_region}, api_domain_name: {api_domain_name}, '
+        f'user_id: {user_id}, api_key: {api_key}, local_ip: {local_ip}, public_ip: {public_ip}'
+    )
 
     # Register as a remote task
     try:
