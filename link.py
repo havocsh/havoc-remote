@@ -121,13 +121,13 @@ def send_response(rt, task_response, forward_log, user_id, task_name, task_conte
 def action(user_id, task_type, task_version, task_commands, task_name, task_context, rt, end_time, command_list,
            public_ip, hostname, local_ip):
     
-    def exit_handler():
+    def exit_handler(rt, user_id, task_name, task_context, task_type, task_version, public_ip, local_ip, end_time):
         send_response(rt, {'outcome': 'success', 'status': 'terminating'}, 'True', user_id, task_name,
-                      task_context, task_type, task_version, instruct_user_id, 'None', 'terminate',
+                      task_context, task_type, task_version, user_id, 'None', 'terminate',
                       {'no_args': 'True'}, public_ip, local_ip, end_time)
         log.msg('remote_operator task exiting')
 
-    atexit.register(exit_handler)
+    atexit.register(exit_handler(rt, user_id, task_name, task_context, task_type, task_version, public_ip, local_ip, end_time))
     local_instruct_instance = {}
 
     while True:
