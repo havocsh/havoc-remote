@@ -24,6 +24,10 @@ copy link.ini.bak link.ini /Y >nul
 
 echo - Deleting temporary ./HAVOC remote_operator update contents
 rmdir havoc-remote-main
+del main.zip
 
 echo - Starting HavocRemoteOperator service
 nssm-2.24\nssm-2.24\win64\nssm.exe start HavocRemoteOperator >nul
+
+echo Update complete
+timeout /t 15 >nul
