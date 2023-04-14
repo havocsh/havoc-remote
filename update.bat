@@ -23,7 +23,7 @@ echo - Restoring link.ini.bak to link.ini
 copy link.ini.bak link.ini /Y >nul
 
 echo - Deleting temporary ./HAVOC remote_operator update contents
-rmdir havoc-remote-main
+rmdir /S havoc-remote-main
 del main.zip
 
 echo - Starting HavocRemoteOperator service
