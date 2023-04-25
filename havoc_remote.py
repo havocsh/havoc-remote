@@ -1,6 +1,6 @@
-import os
 import re
 import socket
+import pathlib
 import requests
 import subprocess
 import time as t
@@ -86,9 +86,10 @@ class Remote:
         if not resolved_ip:
             output = {'outcome': 'failed', 'message': f'could not resolve domain {domain}', 'forward_log': 'False'}
             return output
+        path = pathlib.Path('arsenal', file_name)
         with requests.get(url, stream=True) as r:
             r.raise_for_status()
-            with open(f'arsenal\\{file_name}', 'wb+') as f:
+            with open(path, 'wb+') as f:
                 for chunk in r.iter_content(chunk_size=8192): 
                     f.write(chunk)
         output = {'outcome': 'success', 'task_download_file': {'file_path': 'arsenal', 'file_name': file_name}, 'forward_log': 'True'}

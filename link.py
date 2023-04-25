@@ -71,7 +71,7 @@ def sync_workspace_http(rt, sync_direction):
     sync_workspace_response = None
     h = havoc.Connect(rt.api_region, rt.api_domain_name, rt.api_key, rt.secret, api_version=1)
     try:
-        sync_workspace_response = h.sync_workspace(sync_direction, 'arsenal\\')
+        sync_workspace_response = h.sync_workspace(sync_direction, 'arsenal')
     except Exception as err:
         print(f'sync_workspace_http failed with error {err}')
     return sync_workspace_response
@@ -81,20 +81,21 @@ def file_transfer_http(rt, sync_direction, file_name):
     success = False
     file_transfer_response = None
     h = havoc.Connect(rt.api_region, rt.api_domain_name, rt.api_key, rt.secret, api_version=1)
+    path = pathlib.Path('arsenal', file_name)
     if sync_direction == 'download_from_workspace':
         try:
             file_transfer_response = h.get_file(file_name)
         except Exception as err:
             print(f'file_transfer_http failed for direction {sync_direction}, file_name {file_name} with error {err}')
         if file_transfer_response and 'file_contents' in file_transfer_response:
-            with open(f'arsenal\\{file_name}', 'wb') as w:
+            with open(path, 'wb') as w:
                 w.write(file_transfer_response['file_contents'])
             success = True
         else:
             success = False
     if sync_direction == 'upload_to_workspace':
         try:
-            with open (f'arsenal\\{file_name}', 'rb') as raw_file:
+            with open (path, 'rb') as raw_file:
                 h.create_file(file_name, raw_file.read())
             success = True
         except Exception as err:
@@ -151,7 +152,7 @@ def action(user_id, task_type, task_version, task_commands, task_name, task_cont
                               instruct_user_id, instruct_instance, instruct_command, instruct_args, public_ip, local_ip, end_time)
             elif instruct_command == 'ls':
                 file_list = []
-                for root, subdirs, files in os.walk('arsenal\\'):
+                for root, subdirs, files in os.walk('arsenal'):
                     for filename in files:
                         file_list.append(filename)
                 send_response(rt, {'outcome': 'success', 'ls': {'file_list': file_list}}, 'False', 
@@ -160,7 +161,7 @@ def action(user_id, task_type, task_version, task_commands, task_name, task_cont
             elif instruct_command == 'del':
                 if 'file_name' in instruct_args:
                     file_name = instruct_args['file_name']
-                    path = pathlib.Path(f'arsenal\\{file_name}')
+                    path = pathlib.Path('arsenal', file_name)
                     if path.is_file():
                         os.remove(path)
                         send_response(rt, {'outcome': 'success', 'del': {'file_name': file_name}}, 'True', user_id, task_name,
@@ -182,7 +183,7 @@ def action(user_id, task_type, task_version, task_commands, task_name, task_cont
             elif instruct_command == 'upload_to_workspace':
                 if 'file_name' in instruct_args:
                     file_name = instruct_args['file_name']
-                    path = pathlib.Path(f'arsenal\\{file_name}')
+                    path = pathlib.Path('arsenal', file_name)
                     if path.is_file():
                         file_transfer_http(rt, 'upload_to_workspace', file_name)
                         send_response(rt, {'outcome': 'success', 'upload_to_workspace': {'file_name': file_name}}, 'True', user_id,

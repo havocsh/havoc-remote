@@ -1,0 +1,9 @@
+[Unit]
+Description=./HAVOC remote operator task
+
+[Service]
+Type=oneshot
+ExecStart=/opt/havoc_remote/venv/bin/python3 /opt/havoc_remote/havoc_remote.py
+
+[Install]
+WantedBy=multi-user.target
