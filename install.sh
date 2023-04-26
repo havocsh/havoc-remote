@@ -15,11 +15,6 @@ fi
 
 echo "Installing ./HAVOC remote operator task:"
 echo " - Creating directory structure in /opt/havoc_remote."
-mkdir /opt/havoc_remote
-shopt -s dotglob
-cp -r * /opt/havoc_remote
-shopt -u dotglob
-cd /opt/havoc_remote
 mkdir arsenal
 mkdir data
 
@@ -47,9 +42,13 @@ if [[ ! ${current_git_branch} == ${target_git_branch} ]]; then
 fi
 
 echo " - Installing havoc_remote service."
+if ${PWD} != /opt/havoc-remote; then
+    perl -pi -e "s/ExecStart=.*/ExecStart=${PWD}/venv/bin/python3 ${PWD}/havoc_remote.py/g" havoc_remote.service
+fi
 cp havoc_remote.service /etc/systemd/system/havoc_remote.service
 systemctl enable havoc_remote.service
 
 echo "Installation complete."
-echo "Modify /opt/havoc_remote/link.ini and start the ./HAVOC remote operator task service with the following command:"
+echo "Apply the settings for your ./HAVOC deployment in the ${PWD}/link.ini file"
+echo "and start the ./HAVOC remote operator task service with the following command:"
 echo "  systemctl start havoc_remote.service"
