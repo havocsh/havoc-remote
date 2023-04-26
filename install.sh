@@ -49,6 +49,7 @@ cp havoc_remote.service /etc/systemd/system/havoc_remote.service
 systemctl enable havoc_remote.service
 
 echo "Installation complete."
-echo "Apply the settings for your ./HAVOC deployment in the ${PWD}/link.ini file"
-echo "and start the ./HAVOC remote operator task service with the following command:"
+echo ""
+echo "Apply the settings for your ./HAVOC deployment in the ${PWD}/link.ini file and start the ./HAVOC remote operator task service with the following command:"
+echo ""
 echo "  systemctl start havoc_remote.service"
