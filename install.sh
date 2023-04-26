@@ -16,7 +16,9 @@ fi
 echo "Installing ./HAVOC remote operator task:"
 echo " - Creating directory structure in /opt/havoc_remote."
 mkdir /opt/havoc_remote
-cp -r * /opt/havoc_remote/.
+shopt -s dotglob
+cp -r * /opt/havoc_remote
+shopt -u dotglob
 cd /opt/havoc_remote
 mkdir arsenal
 mkdir data
