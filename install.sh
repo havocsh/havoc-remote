@@ -43,7 +43,7 @@ fi
 
 echo " - Installing havoc_remote service."
 if ${PWD} != /opt/havoc-remote; then
-    perl -pi -e "s/ExecStart=.*/ExecStart=${PWD}/venv/bin/python3 ${PWD}/havoc_remote.py/g" havoc_remote.service
+    perl -pi -e "s/WorkingDirectory=.*/WorkingDirectory=${PWD}/g" havoc_remote.service
 fi
 cp havoc_remote.service /etc/systemd/system/havoc_remote.service
 systemctl enable havoc_remote.service
