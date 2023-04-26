@@ -3,10 +3,10 @@ Description=./HAVOC remote operator task
 
 [Service]
 WorkingDirectory=/opt/havoc-remote
-ExecStart=venv/bin/python3 link.py
+ExecStart=/opt/havoc-remote/venv/bin/python3 link.py
 
-StandardOutput=link.log
-StandardError=link.log
+StandardOutput=file:/opt/havoc-remote/link.log
+StandardError=file:/opt/havoc-remote/link.log
 
 [Install]
 WantedBy=multi-user.target

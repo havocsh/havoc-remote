@@ -12,7 +12,6 @@ if [ ! "${python3_bin}" ]; then
     exit
 fi
 
-
 echo "Installing ./HAVOC remote operator task:"
 echo " - Creating directory structure in /opt/havoc_remote."
 mkdir arsenal
@@ -44,6 +43,9 @@ fi
 echo " - Installing havoc_remote service."
 if ${PWD} != /opt/havoc-remote; then
     perl -pi -e "s/WorkingDirectory=.*/WorkingDirectory=${PWD}/g" havoc_remote.service
+    perl -pi -e "s/ExecStart=.*/ExecStart=${PWD}/venv/bin/python3 link.py/g" havoc_remote.service
+    perl -pi -e "s/StandardOutput=.*/StandardOutput=file:${PWD}/link.log/g" havoc_remote.service
+    perl -pi -e "s/StandardError=.*/StandardError=file:${PWD}/link.log/g" havoc_remote.service
 fi
 cp havoc_remote.service /etc/systemd/system/havoc_remote.service
 systemctl enable havoc_remote.service
@@ -53,3 +55,4 @@ echo ""
 echo "Apply the settings for your ./HAVOC deployment in the ${PWD}/link.ini file and start the ./HAVOC remote operator task service with the following command:"
 echo ""
 echo "  systemctl start havoc_remote.service"
+echo ""
