@@ -22,8 +22,7 @@ mkdir arsenal
 mkdir data
 
 echo " - Creating Python virtual environment."
-${python3} -m venv ./venv
-python3_bin=./venv/bin/python3
+${python3_bin} -m venv ./venv
 pip_bin=./venv/bin/pip3
 
 echo " - Getting ./HAVOC version info."
