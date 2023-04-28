@@ -30,7 +30,7 @@ if [[ ! ${havoc_orig_hash} == ${havoc_new_hash} ]]; then
     exec ./update.sh
 fi
 echo " - Updating the ./HAVOC module."
-${pip_bin} --disable-pip-version-check install -q "havoc @ git+https://github.com/havocsh/havoc-pkg.git@${deployment_version}" --upgrade --force-reinstall
+./venv/bin/pip3 --disable-pip-version-check install -q "havoc @ git+https://github.com/havocsh/havoc-pkg.git@${deployment_version}" --upgrade --force-reinstall
 
 echo " - Restarting the ./HAVOC remote operator task service."
 systemctl restart havoc_remote.service
