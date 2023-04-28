@@ -125,7 +125,7 @@ def action(user_id, task_type, task_version, task_commands, task_name, task_cont
     
     def exit_handler(rt, user_id, task_name, task_context, task_type, task_version, public_ip, local_ip, end_time):
         send_response(rt, {'outcome': 'success', 'status': 'terminating'}, 'True', user_id, task_name,
-                      task_context, task_type, task_version, user_id, 'None', 'terminate',
+                      task_context, task_type, task_version, user_id, 'None', 'None', 'terminate',
                       {'no_args': 'True'}, public_ip, local_ip, end_time)
         log.msg('remote_operator task exiting')
 
