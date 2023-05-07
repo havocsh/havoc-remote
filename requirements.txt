@@ -2,3 +2,4 @@ wheel
 requests==2.25.0
 service-identity
 Twisted
+pywin32
