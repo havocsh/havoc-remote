@@ -1,5 +1,6 @@
 import os
 import re
+import random
 import socket
 import pathlib
 import requests
@@ -13,10 +14,11 @@ class Remote:
         self.host_info = None
         self.results = None
         self.exec_process = None
+        self.share_data = {}
 
     def set_args(self, args, public_ip, hostname, local_ip):
         self.args = args
-        self.host_info = [public_ip, hostname] + local_ip
+        self.host_info = [public_ip, hostname, local_ip]
         return True
 
     def task_execute_command(self):
@@ -129,6 +131,94 @@ class Remote:
             output = {'outcome': 'success', 'task_delete_file': {'file_path': file_path, 'file_name': file_name}, 'forward_log': 'True'}
         else:
             output = {'outcome': 'failed', 'message': f'task_delete_file failed with error: {path} does not exist', 'forward_log': 'False'}
+        return output
+    
+    def task_create_share_with_data(self):        
+        required_args = ['file_path', 'file_count', 'data_volume', 'share_name']
+        for k in self.args.keys():
+            if k not in required_args:
+                output = {'outcome': 'failed', 'message': f'instruct_args must specify {k}', 'forward_log': 'False'}
+                return output
+        
+        file_path = self.args['file_path']
+        if not os.path.exists(pathlib.Path(file_path)):
+            output = {'outcome': 'failed', 'message': f'task_create_share_with_data failed with error: {file_path} does not exist', 'forward_log': 'False'}
+            return output
+        file_count = self.args['file_count']
+        share_name = self.args['share_name']
+        try:
+            data_volume = int(self.args['data_volume']) * 1048576
+            file_size = int(data_volume)/int(file_count)
+        except Exception as e:
+            output = {'outcome': 'failed', 'message': f'task_create_share_with_data failed with error: {e}', 'forward_log': 'False'}
+            return output
+
+        word_site = "https://www.mit.edu/~ecprice/wordlist.10000"
+        response = requests.get(word_site)
+        word_list = response.content.splitlines()
+        
+        self.share_data[share_name] = {}
+        self.share_data[share_name]['file_path'] = file_path
+        self.share_data[share_name]['files'] = []
+        while file_count != 0:
+            file_name = random.choice(word_list)
+            path = pathlib.Path(file_path, file_name)
+            with open(path, 'wb+') as f:
+                f.write("\0" * file_size)
+            self.share_data[share_name]['files'].append(file_name)
+            file_count =- 1
+        
+        import win32net
+        import win32netcon
+        shinfo = {}
+        shinfo['netname'] = share_name
+        shinfo['type'] = win32netcon.STYPE_DISKTREE
+        shinfo['permissions'] = 0
+        shinfo['max_uses'] = -1
+        shinfo['path'] = pathlib.Path(file_path)
+        server = self.host_info[1]
+
+        try:
+            win32net.NetShareAdd(server, 2, shinfo)
+        except win32net.error as e:
+            for f in self.share_data[share_name]['files']:
+                path = pathlib.Path(file_path, f)
+                os.remove(path)
+            output = {'outcome': 'failed', 'message': f'task_create_share_with_data failed with error: {e}', 'forward_log': 'False'}
+            return output
+        
+        output = {'outcome': 'success', 'task_create_share_with_data': {'file_path': file_path, 'share_name': share_name, 'files': self.share_data['files']}, 'forward_log': 'True'}
+        return output
+    
+    def task_delete_share_with_data(self):
+        required_args = ['share_name']
+        for k in self.args.keys():
+            if k not in required_args:
+                output = {'outcome': 'failed', 'message': f'instruct_args must specify {k}', 'forward_log': 'False'}
+                return output
+    
+        share_name = self.args['share_name']
+        if share_name not in self.share_data:
+            output = {'outcome': 'failed', 'message': f'task_delete_share_with_data failed with error: share does not exist', 'forward_log': 'False'}
+            return output
+        
+        file_path = self.share_data[share_name]['file_path']
+        files = self.share_data[share_name]['files']
+        for f in files:
+            path = pathlib.Path(file_path, f)
+            os.remove(path)
+
+        import win32net
+        server = self.host_info[1]
+        
+        try: 
+            win32net.NetShareDel(server, share_name)
+        except win32net.error as e:
+            output = {'outcome': 'failed', 'message': f'task_delete_share_with_data failed with error: {e}', 'forward_log': 'False'}
+            return output
+        
+        del self.share_data[share_name]
+        output = {'outcome': 'success', 'task_delete_share_with_data': {'share_name': share_name}, 'forward_log': 'True'}
         return output
 
     def echo(self):
