@@ -1,3 +1,4 @@
+import os
 import re
 import socket
 import pathlib
@@ -8,7 +9,7 @@ import time as t
 class Remote:
 
     def __init__(self):
-        self.args = None
+        self.args = {}
         self.host_info = None
         self.results = None
         self.exec_process = None
@@ -93,6 +94,41 @@ class Remote:
                 for chunk in r.iter_content(chunk_size=8192): 
                     f.write(chunk)
         output = {'outcome': 'success', 'task_download_file': {'file_path': 'arsenal', 'file_name': file_name}, 'forward_log': 'True'}
+        return output
+
+    def task_create_file(self):
+        required_args = ['file_path', 'file_name', 'file_size']
+        for k in self.args.keys():
+            if k not in required_args:
+                output = {'outcome': 'failed', 'message': f'instruct_args must specify {k}', 'forward_log': 'False'}
+                return output
+        file_path = self.args['file_path']
+        file_name = self.args['file_name']
+        file_size = self.args['file_size']
+        path = pathlib.Path(file_path, file_name)
+        if os.path.exists(file_path):
+            with open(path, 'wb+') as f:
+                f.write("\0" * file_size)
+        else:
+            output = {'outcome': 'failed', 'message': f'task_create_file failed with error: {file_path} does not exist', 'forward_log': 'False'}
+            return output
+        output = {'outcome': 'success', 'task_create_file': {'file_path': file_path, 'file_name': file_name, 'file_size': file_size}, 'forward_log': 'True'}
+        return output
+    
+    def task_delete_file(self):
+        required_args = ['file_path', 'file_name']
+        for k in self.args.keys():
+            if k not in required_args:
+                output = {'outcome': 'failed', 'message': f'instruct_args must specify {k}', 'forward_log': 'False'}
+                return output
+        file_path = self.args['file_path']
+        file_name = self.args['file_name']
+        path = pathlib.Path(file_path, file_name)
+        if os.path.exists(path):
+            os.remove(path)
+            output = {'outcome': 'success', 'task_delete_file': {'file_path': file_path, 'file_name': file_name}, 'forward_log': 'True'}
+        else:
+            output = {'outcome': 'failed', 'message': f'task_delete_file failed with error: {path} does not exist', 'forward_log': 'False'}
         return output
 
     def echo(self):
