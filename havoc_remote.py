@@ -165,7 +165,7 @@ class Remote:
             file_name = random.choice(word_list).decode() + random.choice(extensions_list)
             path = pathlib.Path(file_path, file_name)
             with open(path, 'wb+') as f:
-                f.write("\0" * file_size)
+                f.write("\0" * int(file_size))
             self.share_data[share_name]['files'].append(file_name)
             file_count =- 1
         
