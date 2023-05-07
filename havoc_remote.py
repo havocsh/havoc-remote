@@ -156,12 +156,13 @@ class Remote:
         word_site = "https://www.mit.edu/~ecprice/wordlist.10000"
         response = requests.get(word_site)
         word_list = response.content.splitlines()
+        extensions_list = ['.txt', '.pdf', '.xlsx', '.docx', '.jpg', '.png']
         
         self.share_data[share_name] = {}
         self.share_data[share_name]['file_path'] = file_path
         self.share_data[share_name]['files'] = []
         while file_count != 0:
-            file_name = random.choice(word_list)
+            file_name = random.choice(word_list).decode() + random.choice(extensions_list)
             path = pathlib.Path(file_path, file_name)
             with open(path, 'wb+') as f:
                 f.write("\0" * file_size)
