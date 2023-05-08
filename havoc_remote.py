@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import shutil
 import random
 import socket
@@ -170,7 +171,9 @@ class Remote:
         while file_count != 0:
             file_name = random.choice(word_list).decode() + random.choice(extensions_list)
             path = pathlib.Path(file_path, share_name, file_name)
-            contents = "\0" * int(file_size)
+            contents = '\0'
+            while sys.getsizeof(contents) < int(file_size):
+                contents = contents + '\0'
             with open(path, 'wb+') as f:
                 f.write(contents.encode())
             self.share_data[share_name]['files'].append(file_name)
