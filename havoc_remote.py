@@ -176,11 +176,11 @@ class Remote:
             self.share_data[share_name]['files'].append(file_name)
             file_count -= 1
         
-        import win32net
-        import win32netcon
+        from win32 import win32net
+        from win32 import win32security
         shinfo = {}
         shinfo['netname'] = share_name
-        shinfo['type'] = win32netcon.STYPE_DISKTREE
+        shinfo['type'] = win32security.STYPE_DISKTREE
         shinfo['permissions'] = 0
         shinfo['max_uses'] = -1
         shinfo['path'] = pathlib.Path(file_path, share_name)
@@ -211,7 +211,7 @@ class Remote:
             output = {'outcome': 'failed', 'message': f'task_delete_share_with_data failed with error: share does not exist', 'forward_log': 'False'}
             return output
         
-        import win32net
+        from win32 import win32net
         server = self.host_info[1]
         
         try: 
