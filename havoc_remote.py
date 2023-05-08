@@ -167,7 +167,7 @@ class Remote:
         except Exception as e:
             output = {'outcome': 'failed', 'message': f'task_create_share_with_data failed with error: {e}', 'forward_log': 'False'}
             return output
-        contents = '\0' * file_size
+        contents = '\0' * int(file_size)
         while file_count != 0:
             file_name = random.choice(word_list).decode() + random.choice(extensions_list)
             path = pathlib.Path(file_path, share_name, file_name)
