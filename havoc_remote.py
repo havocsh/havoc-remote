@@ -194,7 +194,8 @@ class Remote:
             return output
         
         final_path = pathlib.Path(file_path, share_name)
-        output = {'outcome': 'success', 'task_create_share_with_data': {'file_path': final_path, 'share_name': share_name, 'files': self.share_data['files']}, 'forward_log': 'True'}
+        files = self.share_data[share_name]['files']
+        output = {'outcome': 'success', 'task_create_share_with_data': {'file_path': final_path, 'share_name': share_name, 'files': files}, 'forward_log': 'True'}
         return output
     
     def task_delete_share_with_data(self):
