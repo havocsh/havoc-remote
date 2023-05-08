@@ -215,7 +215,7 @@ class Remote:
         
         try: 
             win32net.NetShareDel(server, share_name)
-        except win32net.error as e:
+        except Exception as e:
             output = {'outcome': 'failed', 'message': f'task_delete_share_with_data failed with error: {e}', 'forward_log': 'False'}
             return output
 
