@@ -170,8 +170,9 @@ class Remote:
         while file_count != 0:
             file_name = random.choice(word_list).decode() + random.choice(extensions_list)
             path = pathlib.Path(file_path, share_name, file_name)
+            contents = "\0" * int(file_size)
             with open(path, 'wb+') as f:
-                f.write("\0" * int(file_size))
+                f.write(contents.encode())
             self.share_data[share_name]['files'].append(file_name)
             file_count =- 1
         
