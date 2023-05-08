@@ -145,11 +145,11 @@ class Remote:
         if not os.path.exists(pathlib.Path(file_path)):
             output = {'outcome': 'failed', 'message': f'task_create_share_with_data failed with error: {file_path} does not exist', 'forward_log': 'False'}
             return output
-        file_count = self.args['file_count']
+        file_count = int(self.args['file_count'])
         share_name = self.args['share_name']
         try:
-            data_volume = int(self.args['data_volume']) * 1048576
-            file_size = int(data_volume)/int(file_count)
+            data_volume = int(int(self.args['data_volume']) * 1048576)
+            file_size = data_volume/file_count
         except Exception as e:
             output = {'outcome': 'failed', 'message': f'task_create_share_with_data failed with error: {e}', 'forward_log': 'False'}
             return output
