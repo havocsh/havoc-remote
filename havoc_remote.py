@@ -159,11 +159,11 @@ class Remote:
         extensions_list = ['.txt', '.pdf', '.xlsx', '.docx', '.jpg', '.png']
         
         self.share_data[share_name] = {}
-        self.share_data[share_name]['file_path'] = file_path
+        self.share_data[share_name]['file_path'] = pathlib.Path(file_path, share_name)
         self.share_data[share_name]['files'] = []
         while file_count != 0:
             file_name = random.choice(word_list).decode() + random.choice(extensions_list)
-            path = pathlib.Path(file_path, file_name)
+            path = pathlib.Path(file_path, share_name, file_name)
             with open(path, 'wb+') as f:
                 f.write("\0" * int(file_size))
             self.share_data[share_name]['files'].append(file_name)
@@ -176,19 +176,20 @@ class Remote:
         shinfo['type'] = win32netcon.STYPE_DISKTREE
         shinfo['permissions'] = 0
         shinfo['max_uses'] = -1
-        shinfo['path'] = pathlib.Path(file_path)
+        shinfo['path'] = pathlib.Path(file_path, share_name)
         server = self.host_info[1]
 
         try:
             win32net.NetShareAdd(server, 2, shinfo)
         except win32net.error as e:
             for f in self.share_data[share_name]['files']:
-                path = pathlib.Path(file_path, f)
+                path = pathlib.Path(file_path, share_name, f)
                 os.remove(path)
             output = {'outcome': 'failed', 'message': f'task_create_share_with_data failed with error: {e}', 'forward_log': 'False'}
             return output
         
-        output = {'outcome': 'success', 'task_create_share_with_data': {'file_path': file_path, 'share_name': share_name, 'files': self.share_data['files']}, 'forward_log': 'True'}
+        final_path = pathlib.Path(file_path, share_name)
+        output = {'outcome': 'success', 'task_create_share_with_data': {'file_path': final_path, 'share_name': share_name, 'files': self.share_data['files']}, 'forward_log': 'True'}
         return output
     
     def task_delete_share_with_data(self):
