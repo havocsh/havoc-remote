@@ -183,15 +183,13 @@ class Remote:
         shinfo['type'] = win32security.STYPE_DISKTREE
         shinfo['permissions'] = 0
         shinfo['max_uses'] = -1
-        shinfo['path'] = pathlib.Path(file_path, share_name)
+        shinfo['path'] = str(pathlib.Path(file_path, share_name))
         server = self.host_info[1]
 
         try:
             win32net.NetShareAdd(server, 2, shinfo)
-        except win32net.error as e:
-            for f in self.share_data[share_name]['files']:
-                path = pathlib.Path(file_path, share_name, f)
-                os.remove(path)
+        except Exception as e:
+            shutil.rmtree(pathlib.Path(file_path, share_name))
             output = {'outcome': 'failed', 'message': f'task_create_share_with_data failed with error: {e}', 'forward_log': 'False'}
             return output
         
