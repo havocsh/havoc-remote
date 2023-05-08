@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 import random
 import socket
 import pathlib
@@ -161,6 +162,11 @@ class Remote:
         self.share_data[share_name] = {}
         self.share_data[share_name]['file_path'] = pathlib.Path(file_path, share_name)
         self.share_data[share_name]['files'] = []
+        try:
+            os.makedirs(pathlib.Path(file_path, share_name))
+        except Exception as e:
+            output = {'outcome': 'failed', 'message': f'task_create_share_with_data failed with error: {e}', 'forward_log': 'False'}
+            return output
         while file_count != 0:
             file_name = random.choice(word_list).decode() + random.choice(extensions_list)
             path = pathlib.Path(file_path, share_name, file_name)
@@ -204,12 +210,6 @@ class Remote:
             output = {'outcome': 'failed', 'message': f'task_delete_share_with_data failed with error: share does not exist', 'forward_log': 'False'}
             return output
         
-        file_path = self.share_data[share_name]['file_path']
-        files = self.share_data[share_name]['files']
-        for f in files:
-            path = pathlib.Path(file_path, f)
-            os.remove(path)
-
         import win32net
         server = self.host_info[1]
         
@@ -218,6 +218,9 @@ class Remote:
         except win32net.error as e:
             output = {'outcome': 'failed', 'message': f'task_delete_share_with_data failed with error: {e}', 'forward_log': 'False'}
             return output
+
+        file_path = self.share_data[share_name]['file_path']
+        shutil.rmtree(pathlib.Path(file_path))
         
         del self.share_data[share_name]
         output = {'outcome': 'success', 'task_delete_share_with_data': {'share_name': share_name}, 'forward_log': 'True'}
