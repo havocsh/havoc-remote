@@ -193,7 +193,7 @@ class Remote:
             output = {'outcome': 'failed', 'message': f'task_create_share_with_data failed with error: {e}', 'forward_log': 'False'}
             return output
         
-        final_path = pathlib.Path(file_path, share_name)
+        final_path = str(pathlib.Path(file_path, share_name))
         files = self.share_data[share_name]['files']
         output = {'outcome': 'success', 'task_create_share_with_data': {'file_path': final_path, 'share_name': share_name, 'files': files}, 'forward_log': 'True'}
         return output
