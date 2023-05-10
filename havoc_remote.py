@@ -292,7 +292,7 @@ class Remote:
         
         try:
             container = self.docker_client.containers.get(container_name)
-            container_logs = container.logs()
+            container_logs = container.logs().decode()
         except Exception as e:
             output = {'outcome': 'failed', 'message': f'task_get_container_logs failed with error: {e}', 'forward_log': 'False'}
             return output
