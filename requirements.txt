@@ -2,5 +2,5 @@ wheel
 requests==2.29.0
 service-identity
 Twisted
-pywin32
 docker
+pywin32 ; sys_platform == 'win32'
