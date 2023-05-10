@@ -5,6 +5,7 @@ import random
 import socket
 import pathlib
 import requests
+import docker
 import subprocess
 import time as t
 
@@ -16,6 +17,15 @@ class Remote:
         self.results = None
         self.exec_process = None
         self.share_data = {}
+        self.containers = {}
+        self.__docker_client= None
+    
+    @property
+    def docker_client(self):
+        """Returns a docker client (establishes one automatically if one does not already exist)"""
+        if self.__docker_client is None:
+            self.__docker_client = docker.from_env()
+        return self.__docker_client
 
     def set_args(self, args, public_ip, hostname, local_ip):
         self.args = args
@@ -101,9 +111,9 @@ class Remote:
 
     def task_create_file(self):
         required_args = ['file_path', 'file_name', 'file_size']
-        for k in self.args.keys():
-            if k not in required_args:
-                output = {'outcome': 'failed', 'message': f'instruct_args must specify {k}', 'forward_log': 'False'}
+        for arg in required_args:
+            if arg not in self.args:
+                output = {'outcome': 'failed', 'message': f'instruct_args must specify {arg}', 'forward_log': 'False'}
                 return output
         file_path = self.args['file_path']
         file_name = self.args['file_name']
@@ -120,9 +130,9 @@ class Remote:
     
     def task_delete_file(self):
         required_args = ['file_path', 'file_name']
-        for k in self.args.keys():
-            if k not in required_args:
-                output = {'outcome': 'failed', 'message': f'instruct_args must specify {k}', 'forward_log': 'False'}
+        for arg in required_args:
+            if arg not in self.args:
+                output = {'outcome': 'failed', 'message': f'instruct_args must specify {arg}', 'forward_log': 'False'}
                 return output
         file_path = self.args['file_path']
         file_name = self.args['file_name']
@@ -136,9 +146,9 @@ class Remote:
     
     def task_create_share_with_data(self):        
         required_args = ['file_path', 'file_count', 'data_volume', 'share_name']
-        for k in self.args.keys():
-            if k not in required_args:
-                output = {'outcome': 'failed', 'message': f'instruct_args must specify {k}', 'forward_log': 'False'}
+        for arg in required_args:
+            if arg not in self.args:
+                output = {'outcome': 'failed', 'message': f'instruct_args must specify {arg}', 'forward_log': 'False'}
                 return output
         
         file_path = self.args['file_path']
@@ -160,7 +170,7 @@ class Remote:
         extensions_list = ['.txt', '.pdf', '.xlsx', '.docx', '.jpg', '.png']
         
         self.share_data[share_name] = {}
-        self.share_data[share_name]['file_path'] = pathlib.Path(file_path, share_name)
+        self.share_data[share_name]['file_path'] = str(pathlib.Path(file_path, share_name))
         self.share_data[share_name]['files'] = []
         try:
             os.makedirs(pathlib.Path(file_path, share_name))
@@ -200,9 +210,9 @@ class Remote:
     
     def task_delete_share_with_data(self):
         required_args = ['share_name']
-        for k in self.args.keys():
-            if k not in required_args:
-                output = {'outcome': 'failed', 'message': f'instruct_args must specify {k}', 'forward_log': 'False'}
+        for arg in required_args:
+            if arg not in self.args:
+                output = {'outcome': 'failed', 'message': f'instruct_args must specify {arg}', 'forward_log': 'False'}
                 return output
     
         share_name = self.args['share_name']
@@ -224,6 +234,112 @@ class Remote:
         
         del self.share_data[share_name]
         output = {'outcome': 'success', 'task_delete_share_with_data': {'share_name': share_name}, 'forward_log': 'True'}
+        return output
+
+    def task_list_shares_with_data(self):
+        shares_list = []
+        if self.share_data:
+            for share in self.share_data.keys():
+                file_path = self.share_data[share]['file_path']
+                files = self.share_data[share]['files']
+                share_dict = {
+                    'share_name': share,
+                    'file_path': file_path,
+                    'files': files
+                }
+                shares_list.append(share_dict)
+        output = {'outcome': 'success', 'task_list_shares_with_data': shares_list, 'forward_log': 'True'}
+        return output
+    
+    def task_launch_container(self):
+        required_args = ['container_name', 'container_image', 'container_ports']
+        for arg in required_args:
+            if arg not in self.args:
+                output = {'outcome': 'failed', 'message': f'instruct_args must specify {arg}', 'forward_log': 'False'}
+                return output
+        
+        container_name = self.args['container_name']
+        container_image = self.args['container_image']
+        container_ports = self.args['container_ports']
+        if container_name in self.containers:
+            output = {'outcome': 'failed', 'message': f'task_launch_container failed with error: container with name {container_name} already exists', 'forward_log': 'False'}
+            return output
+        
+        self.containers[container_name] = {}
+        self.containers[container_name]['container_image'] = container_image
+        self.containers[container_name]['container_ports'] = container_ports
+        try:
+            self.containers[container_name]['container'] = self.docker_client.containers.run(container_image, name=container_name, ports=container_ports, remove=True, detach=True)
+        except Exception as e:
+            output = {'outcome': 'failed', 'message': f'task_launch_container failed with error: {e}', 'forward_log': 'False'}
+            return output
+        container_id = self.containers[container_name]['container'].id
+        container_dict = {'container_name': container_name, 'container_image': container_image, 'container_ports': container_ports, 'container_id': container_id}
+        output = {'outcome': 'success', 'task_launch_container': container_dict, 'forward_log': 'True'}
+        return output
+    
+    def task_get_container_logs(self):
+        required_args = ['container_name']
+        for arg in required_args:
+            if arg not in self.args:
+                output = {'outcome': 'failed', 'message': f'instruct_args must specify {arg}', 'forward_log': 'False'}
+                return output
+            
+        container_name = self.args['container_name']
+        if container_name not in self.containers:
+            output = {'outcome': 'failed', 'message': f'task_get_container_logs failed with error: container does not exist', 'forward_log': 'False'}
+            return output
+        
+        try:
+            container = self.docker_client.containers.get(container_name)
+            container_logs = container.logs()
+        except Exception as e:
+            output = {'outcome': 'failed', 'message': f'task_get_container_logs failed with error: {e}', 'forward_log': 'False'}
+            return output
+        
+        output = {'outcome': 'success', 'task_get_container_logs': {'container_name': container_name, 'container_logs': container_logs}, 'forward_log': 'True'}
+        return output
+
+
+    def task_stop_container(self):
+        required_args = ['container_name']
+        for arg in required_args:
+            if arg not in self.args:
+                output = {'outcome': 'failed', 'message': f'instruct_args must specify {arg}', 'forward_log': 'False'}
+                return output
+        
+        container_name = self.args['container_name']
+        if container_name not in self.containers:
+            output = {'outcome': 'failed', 'message': f'task_stop_container failed with error: container does not exist', 'forward_log': 'False'}
+            return output
+        
+        try:
+            container = self.docker_client.containers.get(container_name)
+            container.stop()
+            del self.containers[container_name]
+            
+        except Exception as e:
+            output = {'outcome': 'failed', 'message': f'task_stop_container failed with error: {e}', 'forward_log': 'False'}
+            return output
+        
+        output = {'outcome': 'success', 'task_stop_container': {'container_name': container_name}, 'forward_log': 'True'}
+        return output
+    
+    def task_list_containers(self):
+        container_list = []
+        if self.containers:
+            for container in self.containers.keys():
+                container_id = self.containers[container]['container'].id
+                container_image = self.containers[container]['container_image']
+                container_ports = self.containers[container]['container_ports']
+                container_dict = {
+                    'container_name': container, 
+                    'container_id': container_id, 
+                    'container_image': container_image, 
+                    'container_ports': container_ports
+                }
+                container_list.append(container_dict)
+        output = {'outcome': 'success', 'task_list_containers': container_list, 'forward_log': 'True'}
         return output
 
     def echo(self):
