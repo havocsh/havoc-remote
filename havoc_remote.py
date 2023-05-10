@@ -251,7 +251,7 @@ class Remote:
         output = {'outcome': 'success', 'task_list_shares_with_data': shares_list, 'forward_log': 'True'}
         return output
     
-    def task_launch_container(self):
+    def task_run_container(self):
         required_args = ['container_name', 'container_image', 'container_ports']
         for arg in required_args:
             if arg not in self.args:
@@ -262,7 +262,7 @@ class Remote:
         container_image = self.args['container_image']
         container_ports = self.args['container_ports']
         if container_name in self.containers:
-            output = {'outcome': 'failed', 'message': f'task_launch_container failed with error: container with name {container_name} already exists', 'forward_log': 'False'}
+            output = {'outcome': 'failed', 'message': f'task_run_container failed with error: container with name {container_name} already exists', 'forward_log': 'False'}
             return output
         
         self.containers[container_name] = {}
@@ -271,11 +271,11 @@ class Remote:
         try:
             self.containers[container_name]['container'] = self.docker_client.containers.run(container_image, name=container_name, ports=container_ports, remove=True, detach=True)
         except Exception as e:
-            output = {'outcome': 'failed', 'message': f'task_launch_container failed with error: {e}', 'forward_log': 'False'}
+            output = {'outcome': 'failed', 'message': f'task_run_container failed with error: {e}', 'forward_log': 'False'}
             return output
         container_id = self.containers[container_name]['container'].id
         container_dict = {'container_name': container_name, 'container_image': container_image, 'container_ports': container_ports, 'container_id': container_id}
-        output = {'outcome': 'success', 'task_launch_container': container_dict, 'forward_log': 'True'}
+        output = {'outcome': 'success', 'task_run_container': container_dict, 'forward_log': 'True'}
         return output
     
     def task_get_container_logs(self):
