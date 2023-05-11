@@ -259,23 +259,32 @@ class Remote:
                 return output
         
         cn = self.args['container_name']
+        if cn in self.containers:
+            output = {'outcome': 'failed', 'message': f'task_run_container failed with error: container with name {cn} already exists', 'forward_log': 'False'}
+            return output
+        
         ci = self.args['container_image']
         cp = self.args['container_ports']
         all_ports = False
         if cp == 'all_ports':
             all_ports = True
-        if cn in self.containers:
-            output = {'outcome': 'failed', 'message': f'task_run_container failed with error: container with name {cn} already exists', 'forward_log': 'False'}
-            return output
+        cc = None
+        if 'container_command' in self.args:
+            cc = self.args['container_command']
         
         self.containers[cn] = {}
         self.containers[cn]['container_image'] = ci
         self.containers[cn]['container_ports'] = cp
+        container_args = {'name': cn, 'remove': True, 'detach': True}
+        if all_ports:
+            container_args['publish_all_ports'] = True
+        else:
+            container_args['ports'] = cp
+        if cc:
+            container_args['command'] = cc
+        
         try:
-            if all_ports:
-                self.containers[cn]['container'] = self.docker_client.containers.run(ci, name=cn, publish_all_ports=True, remove=True, detach=True)
-            else:
-                self.containers[cn]['container'] = self.docker_client.containers.run(ci, name=cn, ports=cp, remove=True, detach=True)
+            self.containers[cn]['container'] = self.docker_client.containers.run(ci, **container_args)
         except Exception as e:
             output = {'outcome': 'failed', 'message': f'task_run_container failed with error: {e}', 'forward_log': 'False'}
             return output
