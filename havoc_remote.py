@@ -258,23 +258,29 @@ class Remote:
                 output = {'outcome': 'failed', 'message': f'instruct_args must specify {arg}', 'forward_log': 'False'}
                 return output
         
-        container_name = self.args['container_name']
-        container_image = self.args['container_image']
-        container_ports = self.args['container_ports']
-        if container_name in self.containers:
-            output = {'outcome': 'failed', 'message': f'task_run_container failed with error: container with name {container_name} already exists', 'forward_log': 'False'}
+        cn = self.args['container_name']
+        ci = self.args['container_image']
+        cp = self.args['container_ports']
+        all_ports = False
+        if cp == 'all_ports':
+            all_ports = True
+        if cn in self.containers:
+            output = {'outcome': 'failed', 'message': f'task_run_container failed with error: container with name {cn} already exists', 'forward_log': 'False'}
             return output
         
-        self.containers[container_name] = {}
-        self.containers[container_name]['container_image'] = container_image
-        self.containers[container_name]['container_ports'] = container_ports
+        self.containers[cn] = {}
+        self.containers[cn]['container_image'] = ci
+        self.containers[cn]['container_ports'] = cp
         try:
-            self.containers[container_name]['container'] = self.docker_client.containers.run(container_image, name=container_name, ports=container_ports, remove=True, detach=True)
+            if all_ports:
+                self.containers[cn]['container'] = self.docker_client.containers.run(ci, name=cn, publish_all_ports=True, remove=True, detach=True)
+            else:
+                self.containers[cn]['container'] = self.docker_client.containers.run(ci, name=cn, ports=cp, remove=True, detach=True)
         except Exception as e:
             output = {'outcome': 'failed', 'message': f'task_run_container failed with error: {e}', 'forward_log': 'False'}
             return output
-        container_id = self.containers[container_name]['container'].id
-        container_dict = {'container_name': container_name, 'container_image': container_image, 'container_ports': container_ports, 'container_id': container_id}
+        container_id = self.containers[cn]['container'].id
+        container_dict = {'container_name': cn, 'container_image': ci, 'container_ports': cp, 'container_id': container_id}
         output = {'outcome': 'success', 'task_run_container': container_dict, 'forward_log': 'True'}
         return output
     
