@@ -330,7 +330,8 @@ class Remote:
         
         try:
             container = self.docker_client.containers.get(container_name)
-            container.stop()
+            if container:
+                container.stop()
             del self.containers[container_name]
             
         except Exception as e:
@@ -344,16 +345,18 @@ class Remote:
         container_list = []
         if self.containers:
             for container in self.containers.keys():
-                container_id = self.containers[container]['container'].id
-                container_image = self.containers[container]['container_image']
-                container_ports = self.containers[container]['container_ports']
-                container_dict = {
-                    'container_name': container, 
-                    'container_id': container_id, 
-                    'container_image': container_image, 
-                    'container_ports': container_ports
-                }
-                container_list.append(container_dict)
+                c = self.docker_client.containers.get(container)
+                if c:
+                    container_id = self.containers[container]['container'].id
+                    container_image = self.containers[container]['container_image']
+                    container_ports = self.containers[container]['container_ports']
+                    container_dict = {
+                        'container_name': container, 
+                        'container_id': container_id, 
+                        'container_image': container_image, 
+                        'container_ports': container_ports
+                    }
+                    container_list.append(container_dict)
         output = {'outcome': 'success', 'task_list_containers': container_list, 'forward_log': 'True'}
         return output
 
