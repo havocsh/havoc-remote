@@ -327,13 +327,16 @@ class Remote:
         if container_name not in self.containers:
             output = {'outcome': 'failed', 'message': f'task_stop_container failed with error: container does not exist', 'forward_log': 'False'}
             return output
-        
+        container = None
         try:
             container = self.docker_client.containers.get(container_name)
+        except:
+            pass
+
+        try:
             if container:
                 container.stop()
             del self.containers[container_name]
-            
         except Exception as e:
             output = {'outcome': 'failed', 'message': f'task_stop_container failed with error: {e}', 'forward_log': 'False'}
             return output
@@ -345,7 +348,11 @@ class Remote:
         container_list = []
         if self.containers:
             for container in self.containers.keys():
-                c = self.docker_client.containers.get(container)
+                c = None
+                try:
+                    c = self.docker_client.containers.get(container)
+                except:
+                    pass
                 if c:
                     container_id = self.containers[container]['container'].id
                     container_image = self.containers[container]['container_image']
