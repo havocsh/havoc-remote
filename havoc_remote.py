@@ -277,7 +277,7 @@ class Remote:
         self.containers[cn]['container_ports'] = cp
         container_args = {'name': cn, 'remove': True, 'detach': True}
         if all_ports:
-            container_args['publish_all_ports'] = True
+            container_args['network_mode'] = 'host'
         else:
             container_args['ports'] = cp
         if cc:
