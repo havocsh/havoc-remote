@@ -14,7 +14,6 @@ fi
 
 echo "Installing ./HAVOC remote operator task:"
 echo " - Creating directory structure in /opt/havoc_remote."
-mkdir arsenal
 mkdir data
 
 echo " - Creating Python virtual environment."

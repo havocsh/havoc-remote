@@ -51,7 +51,7 @@ nssm-2.24\nssm-2.24\win64\nssm.exe set HavocRemoteOperator AppRotateBytes 104857
 echo - Starting HavocRemoteOperator service
 nssm-2.24\nssm-2.24\win64\nssm.exe start HavocRemoteOperator >nul
 
-mkdir arsenal >nul
+mkdir data >nul
 
 echo Install complete
 timeout /t 15 >nul
