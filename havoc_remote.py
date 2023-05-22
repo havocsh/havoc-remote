@@ -51,72 +51,101 @@ class Remote:
         popen_args = {'stdin': subprocess.PIPE, 'stdout': subprocess.PIPE, 'stderr': subprocess.PIPE}
         if shell:
             popen_args['shell'] = True
-
+        command_id = len(self.commands) + 1
+        self.commands[command_id] = {}
+        self.commands[command_id]['command'] = command
         try:
-            self.commands[command]['process'] = subprocess.Popen(command, **popen_args)
-            pid = self.commands[command]['process'].pid
-            self.commands[command]['pid'] = pid
-            output = {'outcome': 'success', 'task_execute_command': {'command': command, 'pid': pid}, 'forward_log': 'True'}
+            self.commands[command_id]['process'] = subprocess.Popen(command, **popen_args)
+            pid = self.commands[command_id]['process'].pid
+            self.commands[command_id]['pid'] = pid
+            output = {
+                'outcome': 'success', 
+                'task_execute_command': {
+                    'command_id': command_id, 
+                    'command': command, 
+                    'pid': pid
+                },
+                'forward_log': 'True'
+            }
         except Exception as e:
             output = {'outcome': 'failed', 'message': f'task_execute_command failed with error: {e}', 'forward_log': 'True'}
-        
+            return output
         if get_output:
             signal.alarm(int(timeout))
             try:
-                command_output = self.commands[command]['process'].communicate()
+                command_output = self.commands[command_id]['process'].communicate()
             except Exception as e:
                 output = {'outcome': 'failed', 'message': f'task_execute_command failed with error: {e}', 'forward_log': 'True'}
                 return output
-            self.commands[command]['output'] = command_output
+            self.commands[command_id]['output'] = command_output
             command_stdout = command_output[0].decode('utf-8')
             command_stderr = command_output[1].decode('utf-8')
-            output['task_execute_command']['stdout'] = command_stdout
-            output['task_execute_command']['stderr'] = command_stderr
+            output['task_execute_command']['output'] = {}
+            output['task_execute_command']['output']['stdout'] = command_stdout
+            output['task_execute_command']['output']['stderr'] = command_stderr
             signal.alarm(0)
 
         return output
 
     def task_get_command_output(self):
-        required_args = ['command', 'timeout']
+        required_args = ['command_id', 'timeout']
         for arg in required_args:
             if arg not in self.args:
                 output = {'outcome': 'failed', 'message': f'instruct_args must specify {arg}', 'forward_log': 'False'}
                 return output
-        command = self.args['command']
+        command_id = self.args['command_id']
         timeout = self.args['timeout']
-        if not self.commands[command]:
-            output = {'outcome': 'failed', 'message': f'command {command} not found in list of previously executed commands', 'forward_log': 'False'}
+        if not self.commands[command_id]:
+            output = {
+                'outcome': 'failed', 
+                'message': f'command_id {command_id} not found in list of previously executed commands', 
+                'forward_log': 'False'
+            }
             return output
-        pid = self.commands[command]['pid']
-        output = {'outcome': 'success', 'task_get_command_output': {'command': command, 'pid': pid}, 'forward_log': 'True'}
+        pid = self.commands[command_id]['pid']
+        command = self.commands[command_id]['command']
+        output = {
+            'outcome': 'success', 
+            'task_get_command_output': {
+                'command_id': command_id, 
+                'command': command, 
+                'pid': pid
+            }, 
+            'forward_log': 'True'
+        }
 
-        if 'output' in self.commands[command]:
-            command_output = self.commands[command]['output']
+        if 'output' in self.commands[command_id]:
+            command_output = self.commands[command_id]['output']
         else:
             signal.alarm(int(timeout))
             try:
-                command_output = self.commands[command]['process'].communicate()
+                command_output = self.commands[command_id]['process'].communicate()
             except Exception as e:
                 output = {'outcome': 'failed', 'message': f'task_get_command_output failed with error: {e}', 'forward_log': 'True'}
                 return output
-            self.commands[command]['output'] = command_output
+            self.commands[command_id]['output'] = command_output
             
         command_stdout = command_output[0].decode('utf-8')
         command_stderr = command_output[1].decode('utf-8')
-        output['task_execute_command']['stdout'] = command_stdout
-        output['task_execute_command']['stderr'] = command_stderr
+        output['task_execute_command']['output'] = {}
+        output['task_execute_command']['output']['stdout'] = command_stdout
+        output['task_execute_command']['output']['stderr'] = command_stderr
 
         return output
 
     def task_kill_command(self):
-        if 'command' not in self.args:
-            output = {'outcome': 'failed', 'message': 'instruct_args must specify command', 'forward_log': 'False'}
+        if 'command_id' not in self.args:
+            output = {'outcome': 'failed', 'message': 'instruct_args must specify command_id', 'forward_log': 'False'}
             return output
-        command = self.args['command']
-        if not self.commands[command]:
-            output = {'outcome': 'failed', 'message': f'command {command} not found in list of previously executed commands', 'forward_log': 'False'}
+        command_id = self.args['command_id']
+        if not self.commands[command_id]:
+            output = {
+                'outcome': 'failed', 
+                'message': f'command_id {command_id} not found in list of previously executed commands', 
+                'forward_log': 'False'
+            }
             return output
-        self.commands[command]['process'].terminate()
+        self.commands[command_id]['process'].terminate()
         output = {'outcome': 'success', 'task_kill_command': 'command killed', 'forward_log': 'True'}
         return output
     
