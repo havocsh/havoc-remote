@@ -195,10 +195,15 @@ class Remote:
         file_path = self.args['file_path']
         file_name = self.args['file_name']
         file_size = self.args['file_size']
+        try:
+            file_size_bytes = int(int(file_size) * 1048576)
+        except Exception as e:
+            output = {'outcome': 'failed', 'message': f'task_create_file failed with error: {e}', 'forward_log': 'False'}
+            return output
         path = pathlib.Path(file_path, file_name)
         if os.path.exists(file_path):
             with open(path, 'wb+') as f:
-                f.write("\0" * file_size)
+                f.write("\0" * file_size_bytes)
         else:
             output = {'outcome': 'failed', 'message': f'task_create_file failed with error: {file_path} does not exist', 'forward_log': 'False'}
             return output
