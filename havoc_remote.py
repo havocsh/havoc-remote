@@ -7,6 +7,7 @@ import socket
 import pathlib
 import requests
 import docker
+import paramiko
 import subprocess
 import time as t
 
@@ -447,6 +448,67 @@ class Remote:
                     }
                     container_list.append(container_dict)
         output = {'outcome': 'success', 'task_list_containers': container_list, 'forward_log': 'True'}
+        return output
+    
+    def task_scp_copy_file(self):
+        required_args = [
+            'local_file_path', 
+            'local_file_name', 
+            'remote_file_path', 
+            'remote_file_name', 
+            'action',
+            'host', 
+            'username', 
+            'password'
+        ]
+        for arg in required_args:
+            if arg not in self.args:
+                output = {'outcome': 'failed', 'message': f'instruct_args must specify {arg}', 'forward_log': 'False'}
+                return output
+        local_file_path = self.args['local_file_path']
+        local_file_name = self.args['local_file_name']
+        remote_file_path = self.args['remote_file_path']
+        remote_file_name = self.args['remote_file_name']
+        action = self.args['action']
+        host = self.args['host']
+        username = self.args['username']
+        password = self.args['password']
+        remote_file = pathlib.Path(remote_file_path, remote_file_name)
+        local_file = pathlib.Path(local_file_path, local_file_name)
+        if action not in ['get', 'put']:
+            output = {
+                'outcome': 'failed', 
+                'message': f'task_scp_get_file failed with error: action must be one of get, put', 
+                'forward_log': 'False'
+            }
+            return output
+
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        try:
+            ssh.connect(host, username=username, password=password)
+            scp = ssh.open_sftp()
+            if action == 'get':
+                scp.get(remote_file, local_file)
+            if action == 'put':
+                scp.put(local_file, remote_file)
+        except Exception as e:
+            scp.close()
+            ssh.close()
+            output = {'outcome': 'failed', 'message': f'task_scp_get_file failed with error: {e}', 'forward_log': 'False'}
+            return output
+        scp.close()
+        ssh.close()
+        file_size = os.path.getsize(local_file)
+        output = {
+            'outcome': 'success', 
+            'task_scp_get_file': {
+                'local_file_path': local_file_path, 
+                'local_file_name': local_file_name, 
+                'file_size': file_size
+            }, 
+            'forward_log': 'True'
+        }
         return output
 
     def echo(self):
