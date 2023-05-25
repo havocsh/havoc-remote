@@ -40,6 +40,7 @@ class Remote:
             return output
         command = self.args['command']
         shell = None
+        get_output = None
         if 'shell' in self.args:
             shell = self.args['shell']
         if 'get_output' in self.args:
