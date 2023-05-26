@@ -204,7 +204,7 @@ class Remote:
             return output
         path = pathlib.Path(file_path, file_name)
         if os.path.exists(file_path):
-            with open(path, 'wb+') as f:
+            with open(path, 'w+') as f:
                 f.write("\0" * file_size_bytes)
         else:
             output = {'outcome': 'failed', 'message': f'task_create_file failed with error: {file_path} does not exist', 'forward_log': 'False'}
