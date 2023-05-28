@@ -232,7 +232,7 @@ class Remote:
                         file_attrs = entry.stat(follow_symlinks=False)
                         d = datetime.utcfromtimestamp(file_attrs.st_mtime)
                         fmt_date = d.strftime('%m-%d-%Y %H:%M:%S')
-                        ls_results['files'].append({'file_name': file_attrs.name, 'file_size': file_attrs.st_size, 'file_modified': fmt_date})
+                        ls_results['files'].append({'file_name': entry.name, 'file_size': file_attrs.st_size, 'file_modified': fmt_date})
             output = {'outcome': 'success', 'ls': ls_results, 'forward_log': 'True'}
         else:
             output = {'outcome': 'failed', 'message': f'task_delete_file failed with error: {path} does not exist', 'forward_log': 'False'}
