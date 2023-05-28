@@ -510,7 +510,10 @@ class Remote:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            ssh.connect(host, username=username, password=password)
+            ssh.connect(host, username=username, password=password, timeout=10)
+        except Exception as e:
+            output = {'outcome': 'failed', 'message': f'task_scp_get_file failed with error: {e}', 'forward_log': 'False'}
+        try:
             scp = ssh.open_sftp()
             if action == 'get':
                 scp.get(remote_file, local_file)
