@@ -513,6 +513,7 @@ class Remote:
             ssh.connect(host, username=username, password=password, timeout=10)
         except Exception as e:
             output = {'outcome': 'failed', 'message': f'task_scp_get_file failed with error: {e}', 'forward_log': 'False'}
+            return output
         try:
             scp = ssh.open_sftp()
             if action == 'get':
