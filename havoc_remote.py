@@ -10,6 +10,7 @@ import docker
 import paramiko
 import subprocess
 import time as t
+from datetime import datetime
 
 class Remote:
 
@@ -225,11 +226,13 @@ class Remote:
             scandir = os.scandir(path)
             if scandir:
                 for entry in scandir:
-                    ls_results[entry.name] = {}
                     if entry.is_dir(follow_symlinks=False):
                         ls_results['dirs'].append(entry.name)
                     if entry.is_file(follow_symlinks=False):
-                        ls_results['files'].append({'file_name': entry.name, 'file_size': entry.stat(follow_symlinks=False).st_size})
+                        file_attrs = entry.stat(follow_symlinks=False)
+                        d = datetime.utcfromtimestamp(file_attrs.st_mtime)
+                        fmt_date = d.strftime('%m-%d-%Y %H:%M:%S')
+                        ls_results['files'].append({'file_name': file_attrs.name, 'file_size': file_attrs.st_size, 'file_modified': fmt_date})
             output = {'outcome': 'success', 'ls': ls_results, 'forward_log': 'True'}
         else:
             output = {'outcome': 'failed', 'message': f'task_delete_file failed with error: {path} does not exist', 'forward_log': 'False'}
