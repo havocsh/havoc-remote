@@ -153,31 +153,6 @@ def action(user_id, task_type, task_version, task_commands, task_name, task_cont
                 send_response(rt, command_response, 'True', user_id, task_name, task_context, task_type, task_version,
                               instruct_user_id, instruct_id, instruct_instance, instruct_command, instruct_args, public_ip, local_ip,
                               end_time)
-            elif instruct_command == 'ls':
-                file_list = []
-                for root, subdirs, files in os.walk('arsenal'):
-                    for filename in files:
-                        file_list.append(filename)
-                send_response(rt, {'outcome': 'success', 'ls': {'file_list': file_list}}, 'False', 
-                              user_id, task_name, task_context, task_type, task_version, instruct_user_id, instruct_id, instruct_instance,
-                              instruct_command, instruct_args, public_ip, local_ip, end_time)
-            elif instruct_command == 'del':
-                if 'file_name' in instruct_args:
-                    file_name = instruct_args['file_name']
-                    path = pathlib.Path('arsenal', file_name)
-                    if path.is_file():
-                        os.remove(path)
-                        send_response(rt, {'outcome': 'success', 'del': {'file_name': file_name}}, 'True', user_id, task_name,
-                                      task_context, task_type, task_version, instruct_user_id, instruct_id, instruct_instance, instruct_command,
-                                      instruct_args, public_ip, local_ip, end_time)
-                    else:
-                        send_response(rt, {'outcome': 'failed', 'message': 'File not found'}, 'False', user_id,
-                                    task_name, task_context, task_type, task_version, instruct_user_id, instruct_id, instruct_instance,
-                                    instruct_command, instruct_args, public_ip, local_ip, end_time)
-                else:
-                    send_response(rt, {'outcome': 'failed', 'message': 'Missing file_name'}, 'False',
-                                user_id, task_name, task_context, task_type, task_version, instruct_user_id, instruct_id, instruct_instance,
-                                instruct_command, instruct_args, public_ip, local_ip, end_time)
             elif instruct_command == 'sync_to_workspace':
                 file_list = sync_workspace_http(rt, 'sync_to_workspace')
                 send_response(rt, {'outcome': 'success', 'sync_to_workspace': {'file_list': file_list}}, 'False', user_id,

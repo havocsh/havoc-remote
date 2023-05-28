@@ -212,6 +212,29 @@ class Remote:
         output = {'outcome': 'success', 'task_create_file': {'file_path': file_path, 'file_name': file_name, 'file_size': file_size}, 'forward_log': 'True'}
         return output
     
+    def ls(self):
+        required_args = ['file_path']
+        for arg in required_args:
+            if arg not in self.args:
+                output = {'outcome': 'failed', 'message': f'instruct_args must specify {arg}', 'forward_log': 'False'}
+                return output
+        file_path = self.args['file_path']
+        path = pathlib.Path(file_path)
+        ls_results = {'files': [], 'dirs': []}
+        if os.path.exists(path):
+            scandir = os.scandir(path)
+            if scandir:
+                for entry in scandir:
+                    ls_results[entry.name] = {}
+                    if entry.is_dir(follow_symlinks=False):
+                        ls_results['dirs'].append(entry.name)
+                    if entry.is_file(follow_symlinks=False):
+                        ls_results['files'].append({'file_name': entry.name, 'file_size': entry.stat(follow_symlinks=False).st_size})
+            output = {'outcome': 'success', 'ls': ls_results, 'forward_log': 'True'}
+        else:
+            output = {'outcome': 'failed', 'message': f'task_delete_file failed with error: {path} does not exist', 'forward_log': 'False'}
+        return output
+
     def task_delete_file(self):
         required_args = ['file_path', 'file_name']
         for arg in required_args:
@@ -451,7 +474,7 @@ class Remote:
         output = {'outcome': 'success', 'task_list_containers': container_list, 'forward_log': 'True'}
         return output
     
-    def task_scp_copy_file(self):
+    def task_scp_file(self):
         required_args = [
             'local_file_path', 
             'local_file_name', 
