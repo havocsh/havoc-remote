@@ -255,18 +255,22 @@ def get_command_obj(task_name, rt, command_list):
 def main():
 
     # Setup vars
-    config = ConfigParser()
-    config.read('link.ini')
-    task_name = config.get('task', 'task_name')
-    task_context = config.get('task', 'task_context')
-    task_type = config.get('task', 'task_type')
-    task_version = config.get('task', 'task_version')
-    task_commands = config.get('task', 'task_commands').split(',')
-    user_id = config.get('settings', 'user_id')
-    api_region = config.get('settings', 'api_region')
-    api_domain_name = config.get('settings', 'api_domain_name')
-    api_key = config.get('settings', 'api_key')
-    secret = config.get('settings', 'secret')
+    link_ini = ConfigParser()
+    link_ini.read('link.ini')
+    task_name = link_ini.get('settings', 'task_name')
+    task_context = link_ini.get('settings', 'task_context')
+    user_id = link_ini.get('settings', 'user_id')
+    api_region = link_ini.get('settings', 'api_region')
+    api_domain_name = link_ini.get('settings', 'api_domain_name')
+    api_key = link_ini.get('settings', 'api_key')
+    secret = link_ini.get('settings', 'secret')
+
+    link_cfg = ConfigParser()
+    link_cfg.read('link.cfg')
+    task_type = link_cfg.get('task', 'task_type')
+    task_version = link_cfg.get('task', 'task_version')
+    task_commands = link_cfg.get('task', 'task_commands').split(',')
+
     local_ip = [get_ip()]
     public_ip = None
     end_time = 'None'
@@ -274,9 +278,6 @@ def main():
     var_assignments = {
         'task_name': task_name,
         'task_context': task_context,
-        'task_type': task_type,
-        'task_version': task_version,
-        'task_commands': task_commands,
         'user_id': user_id,
         'api_region': api_region,
         'api_domain_name': api_domain_name,
