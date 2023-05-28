@@ -520,7 +520,8 @@ class Remote:
             if action == 'put':
                 scp.put(local_file, remote_file)
         except Exception as e:
-            scp.close()
+            if scp:
+                scp.close()
             ssh.close()
             output = {'outcome': 'failed', 'message': f'task_scp_get_file failed with error: {e}', 'forward_log': 'False'}
             return output
