@@ -497,8 +497,8 @@ class Remote:
         host = self.args['host']
         username = self.args['username']
         password = self.args['password']
-        remote_file = pathlib.Path(remote_file_path, remote_file_name)
-        local_file = pathlib.Path(local_file_path, local_file_name)
+        remote_file = str(pathlib.Path(remote_file_path, remote_file_name))
+        local_file = str(pathlib.Path(local_file_path, local_file_name))
         if action not in ['get', 'put']:
             output = {
                 'outcome': 'failed', 
