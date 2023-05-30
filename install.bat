@@ -1,5 +1,5 @@
 @echo off
-SETLOCAL
+SETLOCAL EnableDelayedExpansion
 FOR /F "tokens=* USEBACKQ" %%F IN (`cd`) DO (SET cwd=%%F)
 
 echo Starting ./HAVOC remote_operator task installation:
