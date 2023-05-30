@@ -61,7 +61,7 @@ if "!svc!"=="True" (
     if "!logon_as!"=="True" (
         set /p "username=Enter the logon as username: "
         for /f "usebackq tokens=*" %%p in (`powershell -Command "$pword = read-host 'Enter the logon as password: ' -AsSecureString ; $BSTR=[System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($pword); [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)"`) do set password=%%p
-        nssm-2.24\nssm-2.24\win64\nssm.exe set HavocRemoteOperator ObjectName !username! !password! >nul
+        nssm-2.24\nssm-2.24\win64\nssm.exe set HavocRemoteOperator ObjectName "!username!" "!password!" >nul
     )
 
     echo - Populate the link.ini file with the necessary parameters and then start the HavocRemoteOperator service.
