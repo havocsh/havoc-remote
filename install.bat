@@ -21,6 +21,7 @@ echo Lib\site-packages>> python310._pth
 
 echo - Installing remote_operator requirements to embedded Python environment
 python.exe -m pip install -r requirements.txt --no-warn-script-location >nul
+python.exe Scripts\pywin32_postinstall.py -install -quiet
 
 echo - Downloading havoc-pkg
 c:\windows\system32\curl.exe -O -L -s https://github.com/havocsh/havoc-pkg/archive/refs/heads/endpoint_fix.zip

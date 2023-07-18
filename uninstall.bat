@@ -6,6 +6,9 @@ nssm-2.24\nssm-2.24\win64\nssm.exe stop HavocRemoteOperator >nul
 echo - Uninstalling HavocRemoteOperator service
 nssm-2.24\nssm-2.24\win64\nssm.exe remove HavocRemoteOperator confirm >nul
 
+echo - Uninstalling pywin32
+python.exe Scripts\pywin32_postinstall.py -remove -silent
+
 echo - Backing up link.ini to link.ini.bak
 copy link.ini link.ini.bak >nul
 
