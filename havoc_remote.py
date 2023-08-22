@@ -168,6 +168,12 @@ class Remote:
             output = {'outcome': 'failed', 'message': 'instruct_args must specify file_name', 'forward_log': 'False'}
             return output
         file_name = self.args['file_name']
+        verify_certificate = True
+        if 'verify_certificate' in self.args:
+            verify_certificate = self.args['verify_certificate']
+        if not isinstance(verify_certificate, bool):
+            output = {'outcome': 'failed', 'message': 'verify_certificate must be bool (True|False)', 'forward_log': 'False'}
+            return output
         resolved_ip = None
         count = 0
         while not resolved_ip and count < 30:
@@ -181,7 +187,7 @@ class Remote:
             output = {'outcome': 'failed', 'message': f'could not resolve domain {domain}', 'forward_log': 'False'}
             return output
         path = pathlib.Path('arsenal', file_name)
-        with requests.get(url, stream=True) as r:
+        with requests.get(url, stream=True, verify=verify_certificate) as r:
             r.raise_for_status()
             with open(path, 'wb+') as f:
                 for chunk in r.iter_content(chunk_size=8192): 
