@@ -71,6 +71,7 @@ if "!svc!"=="True" (
     echo       python link.py
 )
 
+mkdir arsenal >nul
 mkdir data >nul
 
 echo Install complete
