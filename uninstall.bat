@@ -14,7 +14,6 @@ copy link.ini link.ini.bak >nul
 
 echo - Deleting all files and directories except the link.ini backup
 rmdir /S /Q __pycache__ >nul
-rmdir /S /Q havoc-pkg >nul
 rmdir /S /Q Lib >nul
 rmdir /S /Q nssm-2.24 >nul
 rmdir /S /Q Scripts >nul
