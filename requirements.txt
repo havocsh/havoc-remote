@@ -2,6 +2,7 @@ wheel
 requests==2.29.0
 service-identity
 Twisted
+havoc ; sys_platform == 'win32'
 paramiko
 docker
 pywin32 ; sys_platform == 'win32'

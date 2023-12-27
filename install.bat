@@ -23,15 +23,6 @@ echo - Installing remote_operator requirements to embedded Python environment
 python.exe -m pip install -r requirements.txt --no-warn-script-location >nul
 python.exe Scripts\pywin32_postinstall.py -install -quiet
 
-echo - Downloading havoc-pkg
-c:\windows\system32\curl.exe -O -L -s https://github.com/havocsh/havoc-pkg/archive/refs/heads/endpoint_fix.zip
-
-echo - Extracting havoc-pkg contents
-c:\windows\system32\windowspowershell\v1.0\powershell.exe Expand-Archive endpoint_fix.zip -DestinationPath havoc-pkg
-
-echo - Installing havoc-pkg to embedded Python environment
-python.exe -m pip install havoc-pkg\havoc-pkg-endpoint_fix --no-warn-script-location >nul
-
 set /p "svc=Would you like to install the HavocRemoteOperator service? (Y/N): "
 if "!svc!"=="Y" set "svc=True"
 if "!svc!"=="y" set "svc=True"
